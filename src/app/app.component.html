@@ -1,0 +1,65 @@
+<mat-toolbar>
+  <span>Equalit.ie тестовое задание - frontend</span>
+</mat-toolbar>
+<div class="container mt-20">
+  <mat-card>
+    <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+      <mat-card-header >
+        <mat-card-title>Учет поддержки</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div>
+          <mat-form-field class="field field-number">
+            <mat-label>Реципиент</mat-label>
+            <input matInput
+              formControlName="recipient"
+              type="text"
+            >
+          </mat-form-field>
+        </div>
+        <div formArrayName="services">
+          <div  *ngFor="let control of checkoutForm.get('services')?.controls; index as i;">
+            <div [formGroupName]="i">
+              <mat-form-field  class="field">
+                <mat-label>Тип продукта </mat-label>
+                <mat-select
+                  formControlName="type"
+                >
+                  <mat-option *ngFor="let option of productsTypes" [value]="option.id">{{option.name}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field  class="field">
+                <mat-label>Продукт</mat-label>
+                <input type="text"
+                  matInput
+                  formControlName="name"
+                  [matAutocomplete]="auto"
+                  (change)="setProductType($event, i)"
+                >
+                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]=getProductName>
+                  <mat-option *ngFor="let option of filteredProducts[i] | async" [value]="option">
+                    {{option.name}}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+              <mat-form-field class="field field-number">
+                <mat-label>Количество</mat-label>
+                <input matInput
+                  formControlName="volume"
+                  type="number"
+                >
+              </mat-form-field>
+              <button mat-icon-button (click)=removeControl(i)>
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      <button mat-raised-button color="primary" (click)=addControl()>Добавить продукт</button>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" type="submit">Сохранить</button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</div>
