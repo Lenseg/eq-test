@@ -7,10 +7,16 @@ import { catchError, retry } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class DataServicesService {
-
+  url = 'http://127.0.0.1:4433';
   constructor(private http: HttpClient) { }
-  saveServices(userId, services) {
-    console.log(userId, services)
-    return this.http.post(`/services/${services.userId}`, services)
+
+  getServices() {
+    return this.http.get(this.url + `/services/types`)
+  }
+  getTransactions() {
+    return this.http.get(this.url + `/transactions`)
+  }
+  createTransactions(transactions) {
+    return this.http.post(this.url + `/transactions`, transactions)
   }
 }

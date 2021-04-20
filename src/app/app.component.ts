@@ -19,87 +19,23 @@ import { DataServicesService } from './data-services.service';
 })
 export class AppComponent {
   title = 'eq-front';
-  productsTypes = [
+  serviceTypes = [
     {
-      name: 'Материалы',
-      id: 1
-    },
-    {
-      name: 'Консультации',
-      id: 2
-    },
-    {
-      name: 'Налоксон',
-      id: 3
-    },
-    {
-      name: 'Тест',
-      id: 4
-    },
-  ]
-  products = [
-    {
-      name: 'Шприц 1мл (кр. шапочки)',
-      type: 1,
-      id:1
-    },
-    {
-      name: 'шприц 2 мл',
-      type: 1,
-      id:2
-    },
-    {
-      name: 'презерватив',
-      type: 1,
-      id:3
-    },
-    {
-      name: 'шприц 1мл (съемки)',
-      type: 1,
-      id:4
-    },
-    {
-      name: 'шприц 3 мл',
-      type: 1,
-      id:5
-    },
-    {
-      name: 'шприц 5 мл',
-      type: 1,
-      id:6
-    },
-    {
-      name: 'шприц 10 мл',
-      type: 1,
-      id:7
-    },
-    {
-      name: 'Медицинские консультации и услуги',
-      type: 2,
-      id:8
-    },
-    {
-      name: 'Сопровождение в органы власти',
-      type: 2,
-      id:9
-    },
-    {
-      name: 'Консультации родственникам',
-      type: 2,
-      id:10
-    },
-    {
-      name: 'Жалобы в гос. органы',
-      type: 2,
-      id:11
-    },
-    {
-      name: 'Налоксон',
-      type: 3,
-      id:12
+      id:1,
+      name: "Материалы"
+    },{
+      id: 2,
+      name: "Консультации"
+    },{
+      id:3,
+      name: "Налоксон"
+    },{
+      id:4,
+      name: "Тест"
     }
   ];
-  filteredProducts: Observable<{name:string, id: number, type:number}[]>[] = [];
+  services = [];
+  filteredServices: Observable<{name:string, id: number, type:number}[]>[] = [];
   checkoutForm = this.fb.group({
     recipient: new FormControl('', [
       Validators.required,
@@ -109,7 +45,7 @@ export class AppComponent {
       this.buildNewGroup()
     ])
   })
-
+  loader = false
 
 
   constructor(
@@ -117,13 +53,14 @@ export class AppComponent {
     private dataServices: DataServicesService
   ) {
     this.manageNameControl(0);
+    this.getServices();
   }
 
   manageNameControl(index: number) {
     let arrayControl = this.checkoutForm.get('services') as FormArray;
     arrayControl.at(index).get('name').valueChanges.subscribe(x => {
       if(typeof x !== 'string') {
-        this.setProductType(x, index);
+        this.setServiceType(x, index);
       }
     })
     arrayControl.at(index).get('type').valueChanges
@@ -135,7 +72,7 @@ export class AppComponent {
         arrayControl.at(index).get('name').updateValueAndValidity({ onlySelf: false, emitEvent: true });
       }
     })
-    this.filteredProducts[index] = arrayControl.at(index).get('name').valueChanges
+    this.filteredServices[index] = arrayControl.at(index).get('name').valueChanges
       .pipe(
         startWith(''),
         map(value => typeof value === 'string' ? value : value.name),
@@ -157,18 +94,18 @@ export class AppComponent {
   private _filter(value: string, index: number): {name:string, id: number, type:number}[] {
     const arrayControl = <FormArray>this.checkoutForm.get('services') as FormArray;
     const type = arrayControl.controls[index].get('type').value;
-    const filteredByType = type ? this.products.filter(option => option.type === type) : this.products;
+    const filteredByType = type && this.services ? this.services.filter(option => option.type === type) : this.services;
     const filterValue = value.toLowerCase();
     return filteredByType.filter(option => option.name.toLowerCase().indexOf(filterValue) === 0);
   }
 
-  getProductName(product) {
-    return product.name
+  getServiceName(service) {
+    return service.name
   }
 
-  setProductType(product, index) {
+  setServiceType(service, index) {
     const arrayControl = <FormArray>this.checkoutForm.get('services') as FormArray;
-    arrayControl.controls[index].get('type').setValue(product.type);
+    arrayControl.controls[index].get('type').setValue(service.type);
   }
 
   buildNewGroup() {
@@ -185,20 +122,25 @@ export class AppComponent {
       ])
     })
   }
-
   onSubmit(): void {
     if(this.checkoutForm.valid) {
-      this.dataServices.saveServices(
-        this.checkoutForm.value.recipient,
-        this.serializeData(this.checkoutForm.value.services))
+      this.loader = true
+      this.dataServices.createTransactions(
+        this.serializeData(this.checkoutForm.value.services, this.checkoutForm.value.recipient)
+      ).subscribe((services:[]) => this.loader = false)
     }
   }
-  serializeData(services) {
+  serializeData(services, recipient) {
     return services.map(service => {
       return {
         volume: service.volume,
-        id: service.name.id
+        id: service.id,
+        recipient: recipient
       }
     })
+  }
+  getServices() {
+    this.dataServices.getServices()
+      .subscribe((services:[]) => this.services = services);
   }
 }

@@ -25,7 +25,7 @@
                 <mat-select
                   formControlName="type"
                 >
-                  <mat-option *ngFor="let option of productsTypes" [value]="option.id">{{option.name}}</mat-option>
+                  <mat-option *ngFor="let option of serviceTypes" [value]="option.id">{{option.name}}</mat-option>
                 </mat-select>
               </mat-form-field>
               <mat-form-field  class="field">
@@ -34,10 +34,10 @@
                   matInput
                   formControlName="name"
                   [matAutocomplete]="auto"
-                  (change)="setProductType($event, i)"
+                  (change)="setServiceType($event, i)"
                 >
-                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]=getProductName>
-                  <mat-option *ngFor="let option of filteredProducts[i] | async" [value]="option">
+                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]=getServiceName>
+                  <mat-option *ngFor="let option of filteredServices[i] | async" [value]="option">
                     {{option.name}}
                   </mat-option>
                 </mat-autocomplete>
@@ -59,6 +59,7 @@
       </mat-card-content>
       <mat-card-actions>
         <button mat-raised-button color="primary" type="submit">Сохранить</button>
+        <mat-icon *ngIf="loader" aria-hidden="false">loader</mat-icon>
       </mat-card-actions>
     </form>
   </mat-card>
