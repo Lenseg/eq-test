@@ -140,7 +140,7 @@ export class AppComponent {
     })
   }
   getServices() {
-    this.dataServices.getServices()
-      .subscribe((services:[]) => this.services = services);
+    this.services = this.dataServices.getServices();
+      // .subscribe((services:[]) => this.services = services);
   }
 }
